@@ -35,7 +35,7 @@ export function Siem() {
       </div>
 
       {!result && <div className="empty">Enter an SPL query. Fields: index, sourcetype, host, user, src_ip, dest_ip, dest_port, domain, url, action, process, message. Commands: search, where, stats, table, fields, sort, head, dedup, top, rename.</div>}
-      {result?.error && <div className="card" style={{ borderColor: '#5a2b34', color: 'var(--red)' }}>{result.error}</div>}
+      {result?.error && <div className="card" style={{ borderColor: '#C79A93', color: 'var(--red)' }}>{result.error}</div>}
 
       {result && !result.error && (
         <div>

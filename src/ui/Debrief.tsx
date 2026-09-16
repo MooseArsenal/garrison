@@ -8,7 +8,7 @@ export function Debrief({ result, onExit, onRetry }: { result: GradeResult; onEx
   const r = result;
   const chosenReply = s.replies.find((x) => x.id === ticket.replyId);
   const bestReply = s.replies.find((x) => x.best);
-  const ring = `conic-gradient(${scoreColor(r.overall)} ${r.overall * 3.6}deg, #1a2536 0deg)`;
+  const ring = `conic-gradient(${scoreColor(r.overall)} ${r.overall * 3.6}deg, var(--ground-2) 0deg)`;
 
   return (
     <div className="debrief">
@@ -34,7 +34,7 @@ export function Debrief({ result, onExit, onRetry }: { result: GradeResult; onEx
       </div>
 
       {r.forbiddenHits.length > 0 && (
-        <div className="card" style={{ borderColor: '#5a2b34' }}>
+        <div className="card" style={{ borderColor: '#C79A93' }}>
           <h4 style={{ color: 'var(--red)' }}>What hurt you most</h4>
           {r.forbiddenHits.map((f, i) => (
             <div key={i} className="mb"><strong>{f.label}</strong><div className="small dim">{f.why}</div></div>
@@ -85,7 +85,7 @@ export function Debrief({ result, onExit, onRetry }: { result: GradeResult; onEx
         </div>
       ))}
 
-      <div className="card" style={{ background: '#101d30', borderColor: 'var(--border-2)' }}>
+      <div className="card" style={{ background: 'var(--wash-info)', borderColor: '#B9CDCE' }}>
         <h4>Debrief</h4>
         <div className="small" style={{ lineHeight: 1.65 }}>{s.debrief}</div>
         <hr className="sep" />
