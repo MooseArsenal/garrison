@@ -3,6 +3,7 @@ import { useSession, usePersisted } from '../../engine/session';
 import { fmt } from '../../engine/world';
 import type { Host, Proc } from '../../engine/types';
 import { useToast } from '../common';
+import { suspiciousProc, interestingProc } from '../procHeuristics';
 
 export function Edr() {
   const { world, act } = useSession();
@@ -88,13 +89,13 @@ function ProcTree({ host, onView, onKill }: { host: Host; onView: () => void; on
     byParent.get(k)!.push(p);
   }
   const roots = host.processes.filter((p) => !p.parentPid || !host.processes.some((x) => x.pid === p.parentPid));
-  // Only show interesting roots: user apps and anything suspicious, to keep the tree readable
-  const interesting = (p: Proc): boolean => p.signed === false || /winword|excel|powershell|cmd|wscript|cscript|update-svc|lock\.exe|rundll|mshta/i.test(p.name) || (p.path ?? '').match(/\\(AppData|Temp|Public)\\/i) != null;
+  // Only show interesting roots: LOLBins/Office anchors and anything suspicious, to keep the tree readable
+  const interesting = interestingProc;
   const anyInteresting = host.processes.some(interesting);
 
   function render(p: Proc, depth: number): React.ReactNode {
     const kids = byParent.get(p.pid) ?? [];
-    const susp = p.signed === false || (p.path ?? '').match(/\\(AppData|Temp|Public|Windows\\Temp)\\/i);
+    const susp = suspiciousProc(p);
     return (
       <div key={p.pid}>
         <div className={`node ${susp ? 'susp' : ''} between`} style={{ paddingRight: 6 }}>

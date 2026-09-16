@@ -4,6 +4,7 @@ import { fmt } from '../../engine/world';
 import type { Host } from '../../engine/types';
 import { runCommand } from '../../engine/terminal';
 import { useToast } from '../common';
+import { suspiciousProc } from '../procHeuristics';
 
 type RTab = 'tasks' | 'services' | 'events' | 'devices' | 'network' | 'sched' | 'programs' | 'ext' | 'files' | 'terminal';
 
@@ -81,7 +82,7 @@ function useHostAct(hostId: string) {
 function TaskManager({ host, onView, onKill }: { host: Host; onView: () => void; onKill: (name: string, pid: number) => void }) {
   useEffect(onView, [host.id]);
   const sorted = [...host.processes].sort((a, b) => b.cpu - a.cpu);
-  const susp = (p: Host['processes'][number]) => p.signed === false || (p.path ?? '').match(/\\(AppData|Temp|Public|Windows\\Temp)\\/i);
+  const susp = (p: Host['processes'][number]) => suspiciousProc(p);
   return (
     <table className="data">
       <thead><tr><th>Name</th><th>PID</th><th>User</th><th>CPU%</th><th>Mem MB</th><th>Path / command line</th><th></th></tr></thead>
