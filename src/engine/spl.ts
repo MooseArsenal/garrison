@@ -57,8 +57,9 @@ export function eventToRow(e: LogEvent): SplRow {
 
 const FIELD_ALIASES: Record<string, string> = {
   ip: 'src_ip', srcip: 'src_ip', source_ip: 'src_ip', dst: 'dest_ip', dstip: 'dest_ip',
-  destination_ip: 'dest_ip', port: 'dest_port', dstport: 'dest_port', username: 'user',
+  destination_ip: 'dest_ip', port: 'dest_port', dstport: 'dest_port', dst_port: 'dest_port', username: 'user',
   account: 'user', computer: 'host', hostname: 'host', dvc: 'host', app: 'app', signature: 'message',
+  logon_type: 'logonType', logontype: 'logonType', eventid: 'eventId', event_id: 'eventId', event_code: 'eventId', eventcode: 'eventId',
 };
 function canon(field: string): string {
   const f = field.toLowerCase();
@@ -100,7 +101,7 @@ function parseSearchTerms(text: string): Term[] {
 
 function matchTerm(row: SplRow, t: Term): boolean {
   if (t.op === 'term') {
-    const hay = JSON.stringify(row).toLowerCase();
+    const hay = (row as { __hay?: string }).__hay ?? JSON.stringify(row).toLowerCase();
     const hit = t.value.includes('*') ? wildToRe(t.value).test(hay) || hay.includes(t.value.replace(/\*/g, '').toLowerCase()) : hay.includes(t.value.toLowerCase());
     return t.neg ? !hit : hit;
   }
@@ -127,9 +128,23 @@ function applySearch(rows: SplRow[], text: string): SplRow[] {
   return rows.filter((r) => terms.every((t) => matchTerm(r, t)));
 }
 
+// Build rows once per logs array and precompute a lowercased haystack per row,
+// so free-text term search doesn't JSON.stringify every row on every keystroke.
+let rowCache: { logs: LogEvent[]; len: number; rows: SplRow[] } | null = null;
+function rowsFor(events: LogEvent[]): SplRow[] {
+  if (rowCache && rowCache.logs === events && rowCache.len === events.length) return rowCache.rows;
+  const rows = events.map((e) => {
+    const r = eventToRow(e);
+    (r as { __hay?: string }).__hay = JSON.stringify(r).toLowerCase();
+    return r;
+  }).sort((a, b) => String(b._time).localeCompare(String(a._time)));
+  rowCache = { logs: events, len: events.length, rows };
+  return rows;
+}
+
 export function runSpl(events: LogEvent[], query: string): SplResult {
   const q = query.trim();
-  let rows = events.map(eventToRow).sort((a, b) => String(b._time).localeCompare(String(a._time)));
+  let rows = rowsFor(events);
   if (!q) return { kind: 'events', columns: [], rows, eventCount: rows.length };
 
   const stages = q.split('|').map((s) => s.trim());

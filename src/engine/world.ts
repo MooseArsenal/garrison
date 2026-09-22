@@ -647,30 +647,127 @@ Remote users: ship from stock with a prepaid return label for the old device; lo
 // ----------------------------------------------------------------------------
 // Baseline logs (noise). Scenarios add signal on top.
 // ----------------------------------------------------------------------------
+// Deterministic PRNG so the baseline corpus is identical every load (a training
+// tool should be reproducible; scenarios layer their signal on top).
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Benign SaaS the whole company talks to all day — the noise a hunter filters.
+const SAAS: { d: string; ip: string; cat: string }[] = [
+  { d: 'teams.microsoft.com', ip: '52.113.194.132', cat: 'collab' },
+  { d: 'outlook.office.com', ip: '52.96.1.10', cat: 'mail' },
+  { d: 'kestreldynamics.sharepoint.com', ip: '13.107.136.9', cat: 'files' },
+  { d: 'login.microsoftonline.com', ip: '20.190.160.20', cat: 'sso' },
+  { d: 'cdn.zoom.us', ip: '170.114.52.2', cat: 'collab' },
+  { d: 'github.com', ip: '140.82.113.3', cat: 'dev' },
+  { d: 'api.salesforce.com', ip: '104.109.10.10', cat: 'crm' },
+  { d: 'update.googleapis.com', ip: '142.250.72.4', cat: 'update' },
+  { d: 'www.google.com', ip: '142.250.72.4', cat: 'web' },
+  { d: 'slack.com', ip: '3.89.11.1', cat: 'collab' },
+  { d: 'login.worksuite-mail.net', ip: '52.96.1.10', cat: 'sso' },
+  { d: 'graph.microsoft.com', ip: '20.190.161.4', cat: 'api' },
+  { d: 'edge.microsoft.com', ip: '13.107.5.88', cat: 'update' },
+  { d: 'aws.amazon.com', ip: '52.94.236.2', cat: 'cloud' },
+];
+const EDR_CLOUD = { d: 'halberd-cloud.net', ip: '34.117.59.81' };
+
 function baselineLogs(users: DirUser[], hosts: Host[]): LogEvent[] {
+  const rnd = mulberry32(0xC0FFEE);
+  const pick = <T,>(arr: T[]): T => arr[Math.floor(rnd() * arr.length)];
   const logs: LogEvent[] = [];
-  const domains = ['login.worksuite-mail.net', 'teams.microsoft.com', 'update.googleapis.com', 'kestreldynamics.sharepoint.com', 'cdn.zoom.us', 'www.google.com', 'outlook.office.com', 'halberd-cloud.net'];
-  for (let i = 0; i < hosts.length; i++) {
-    const h = hosts[i];
+  const WINDOW = 48 * 60; // last 48h in minutes
+  const t = () => Math.floor(rnd() * WINDOW) + 3; // minutes ago within the window
+
+  // ---- per-endpoint activity: web, EDR heartbeats, auth, OS telemetry ----
+  for (const h of hosts) {
     const u = users.find((x) => x.id === h.owner);
-    for (let j = 0; j < 4; j++) {
-      const d = domains[(i + j * 3) % domains.length];
-      logs.push({ time: ago(30 + i * 9 + j * 17), source: 'dns', host: h.id, srcIp: h.ip, domain: d, action: 'query', message: `A ${d}` });
-      logs.push({ time: ago(30 + i * 9 + j * 17), source: 'proxy', host: h.id, user: u?.id, srcIp: h.ip, domain: d, url: `https://${d}/`, action: 'allow', dstPort: 443, message: `GET https://${d}/ 200` });
+    const remote = h.site.startsWith('Remote');
+    // web / dns browsing
+    const hits = 8 + Math.floor(rnd() * 8);
+    for (let j = 0; j < hits; j++) {
+      const s = pick(SAAS);
+      const when = t();
+      logs.push({ time: ago(when), source: 'dns', host: h.id, srcIp: h.ip, domain: s.d, action: 'query', message: `A? ${s.d} -> ${s.ip}`, fields: { qtype: 'A' } });
+      logs.push({ time: ago(when), source: 'proxy', host: h.id, user: u?.id, srcIp: h.ip, dstIp: s.ip, domain: s.d, url: `https://${s.d}/`, action: 'allow', dstPort: 443, message: `GET https://${s.d}/ 200 (${s.cat})`, fields: { status: 200, category: s.cat } });
     }
+    // EDR agent beacons to the vendor cloud
+    for (let j = 0; j < 5 + Math.floor(rnd() * 4); j++) {
+      logs.push({ time: ago(t()), source: 'firewall', host: h.id, srcIp: h.ip, dstIp: EDR_CLOUD.ip, dstPort: 443, action: 'allow', message: `ALLOW ${h.ip} -> ${EDR_CLOUD.ip}:443 ${EDR_CLOUD.d} (EDR heartbeat)` });
+    }
+    logs.push({ time: ago(t()), source: 'edr', host: h.id, action: 'health', message: `Halberd sensor healthy on ${h.id} (definitions current)`, fields: { agent: 'healthy' } });
+    // DHCP lease
+    if (h.network.dhcp) logs.push({ time: ago(t()), source: 'dhcp', host: h.id, srcIp: h.ip, action: 'ack', message: `DHCPACK ${h.ip} to ${h.mac} lease 8h`, fields: { mac: h.mac } });
+    // Windows OS telemetry
+    logs.push({ time: ago(t()), source: 'windows', host: h.id, action: 'update', message: `Windows Update: scan completed, ${Math.floor(rnd() * 3)} updates pending`, fields: { eventId: 43 } });
     if (u) {
-      logs.push({ time: ago(200 + i * 13), source: 'auth', host: h.id, user: u.id, srcIp: h.ip, action: 'logon', message: `4624 Logon type 2 (Interactive) ${u.id} on ${h.id}`, fields: { logonType: 2, eventId: 4624 } });
-      logs.push({ time: ago(180 + i * 13), source: 'cloud', user: u.id, srcIp: u.location.startsWith('Remote') ? '73.14.22.190' : h.ip, action: 'signin', message: `WorkSuite sign-in success ${u.id} app=Mail mfa=satisfied`, fields: { result: 'success', app: 'Mail', mfa: 'satisfied' } });
+      const srcIp = remote ? (u.recentSignIns[0]?.ip ?? '73.14.22.190') : h.ip;
+      // morning interactive logon + a couple of unlocks + logoff
+      logs.push({ time: ago(400 + Math.floor(rnd() * 200)), source: 'auth', host: h.id, user: u.id, srcIp, action: 'logon', message: `4624 An account was successfully logged on. Account: ${u.id}. Logon Type: 2 (Interactive). Host: ${h.id}`, fields: { eventId: 4624, logonType: 2 } });
+      for (let j = 0; j < 2 + Math.floor(rnd() * 3); j++) {
+        logs.push({ time: ago(t()), source: 'auth', host: h.id, user: u.id, srcIp, action: 'unlock', message: `4624 Logon Type: 7 (Unlock). Account: ${u.id} on ${h.id}`, fields: { eventId: 4624, logonType: 7 } });
+      }
+      // network logon to the file server (SMB) — type 3 is extremely common/benign
+      logs.push({ time: ago(t()), source: 'auth', host: 'DEN-FS01', user: u.id, srcIp: h.ip, action: 'logon', message: `4624 Logon Type: 3 (Network). Account: ${u.id} from ${h.id} to \\\\FS01`, fields: { eventId: 4624, logonType: 3 } });
+      // occasional benign mistype at the keyboard
+      if (rnd() < 0.25) logs.push({ time: ago(t()), source: 'auth', host: h.id, user: u.id, srcIp, action: 'fail', message: `4625 Failed logon. Account: ${u.id}. Reason: bad password (user mistype). Host: ${h.id}`, fields: { eventId: 4625, logonType: 2 } });
     }
   }
-  // Some ambient firewall noise
-  for (let k = 0; k < 12; k++) {
-    logs.push({ time: ago(15 + k * 23), source: 'firewall', srcIp: `203.0.113.${20 + k}`, dstIp: '198.51.100.10', dstPort: [22, 3389, 445, 443][k % 4], action: 'deny', message: `DENY inbound TCP 203.0.113.${20 + k} -> 198.51.100.10:${[22, 3389, 445, 443][k % 4]} (internet scan noise)` });
+
+  // ---- per-user cloud sign-ins + inbound mail ----
+  const mailSenders = ['newsletter@atlassian.com', 'notifications@github.com', 'no-reply@salesforce.com', 'calendar@zoom.us', 'billing@microsoft.com', 'hr-updates@kestreldynamics.com'];
+  for (const u of users) {
+    if (u.id.startsWith('svc_')) continue;
+    const remote = u.location.startsWith('Remote');
+    const ip = remote ? (u.recentSignIns[0]?.ip ?? '73.14.22.190') : (hosts.find((h) => h.owner === u.id)?.ip ?? '10.10.20.30');
+    for (let j = 0; j < 3 + Math.floor(rnd() * 4); j++) {
+      const app = pick(['WorkSuite Mail', 'SharePoint', 'Teams', 'Salesforce', 'GitHub SSO']);
+      logs.push({ time: ago(t()), source: 'cloud', user: u.id, srcIp: ip, action: 'signin', message: `Sign-in success user=${u.id} app=${app} mfa=satisfied ip=${ip}`, fields: { result: 'success', app, mfa: 'satisfied' } });
+    }
+    for (let j = 0; j < 2 + Math.floor(rnd() * 3); j++) {
+      const from = pick(mailSenders);
+      logs.push({ time: ago(t()), source: 'email', user: u.id, action: 'deliver', message: `Delivered to ${u.id}@kestreldynamics.com from ${from} (spf=pass dkim=pass dmarc=pass)`, fields: { from, verdict: 'clean' } });
+    }
   }
-  logs.push({ time: ago(300), source: 'vpn', user: 'cflores', srcIp: '73.14.22.190', action: 'connect', message: 'VPN session established user=cflores assigned=10.10.99.14 geo=Phoenix,US mfa=satisfied' });
-  logs.push({ time: ago(280), source: 'vpn', user: 'hsato', srcIp: '67.160.8.51', action: 'connect', message: 'VPN session established user=hsato assigned=10.10.99.22 geo=Seattle,US mfa=satisfied' });
-  logs.push({ time: ago(420), source: 'vpn', user: 'abaxter', srcIp: '98.42.117.9', action: 'connect', message: 'VPN session established user=abaxter assigned=10.10.99.40 geo=Austin,US mfa=satisfied' });
+
+  // ---- remote workers on the VPN ----
+  for (const [uid, ip, geo, asn] of [['cflores', '73.14.22.190', 'Phoenix,US', '10.10.99.14'], ['hsato', '67.160.8.51', 'Seattle,US', '10.10.99.22'], ['abaxter', '98.42.117.9', 'Austin,US', '10.10.99.40']] as const) {
+    for (let j = 0; j < 2 + Math.floor(rnd() * 2); j++) {
+      logs.push({ time: ago(t()), source: 'vpn', user: uid, srcIp: ip, action: 'connect', message: `VPN session established user=${uid} assigned=${asn} geo=${geo} mfa=satisfied` });
+      logs.push({ time: ago(t()), source: 'vpn', user: uid, srcIp: ip, action: 'disconnect', message: `VPN session closed user=${uid} duration=${1 + Math.floor(rnd() * 6)}h` });
+    }
+  }
+
+  // ---- perimeter background scanning noise (internet is loud) ----
+  const ports = [22, 23, 80, 443, 445, 3389, 1433, 8080, 5900];
+  for (let k = 0; k < 90; k++) {
+    const oct = 20 + Math.floor(rnd() * 230);
+    const port = pick(ports);
+    logs.push({ time: ago(t()), source: 'firewall', srcIp: `${pick(['203.0.113', '198.51.100', '141.98.11', '89.248.165', '193.32.162', '92.63.197'])}.${oct}`, dstIp: '198.51.100.10', dstPort: port, action: 'deny', message: `DENY inbound TCP ${oct} -> 198.51.100.10:${port} (internet scan)` });
+  }
+
+  // ---- server-side: DCs, file server, app server, backups, scanner ----
+  for (const svcAcct of ['svc_backup', 'svc_scanner']) {
+    for (let j = 0; j < 6; j++) {
+      logs.push({ time: ago(t()), source: 'auth', host: 'DEN-DC01', user: svcAcct, action: 'kerberos', message: `4769 Kerberos service ticket requested by ${svcAcct} (service account, scheduled)`, fields: { eventId: 4769 } });
+    }
+  }
+  for (let j = 0; j < 20; j++) {
+    const h = pick(hosts);
+    logs.push({ time: ago(t()), source: 'windows', host: 'DEN-FS01', user: h.owner, action: 'smb', message: `5140 A network share object was accessed. \\\\FS01\\Shared by ${h.owner ?? 'system'}`, fields: { eventId: 5140 } });
+  }
+  logs.push({ time: ago(60 * 9), source: 'edr', host: 'DEN-BKP01', user: 'svc_backup', action: 'backup', message: 'FS01-Daily-Shares backup completed successfully (30 restore points)' });
   logs.push({ time: ago(60 * 6), source: 'edr', host: 'DEN-DC01', user: 'svc_scanner', action: 'info', message: 'Scheduled vulnerability scan started from 10.10.10.70 (svc_scanner) - authorized weekly scan', process: 'nessusd' });
+  for (let j = 0; j < 8; j++) {
+    logs.push({ time: ago(t()), source: 'dhcp', host: 'DEN-DC01', action: 'ack', message: `DHCPACK issued from Denver-Users scope (${118 + j}/231 leases in use)` });
+  }
+
   return logs.sort((a, b) => a.time.localeCompare(b.time));
 }
 

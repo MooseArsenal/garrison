@@ -80,7 +80,7 @@ Garrison's consoles are styled after the products a real best-of-breed SOC runs,
 
 ### Investigate like the real thing
 
-Search logs in SPL, then pivot — the same query language you'll write on the job:
+Search a realistic, noisy multi-source log set (auth, dns, proxy, firewall, cloud, email, EDR, VPN, DHCP) in SPL, then pivot — the same query language you'll write on the job. Hunting here means filtering genuine noise, not spotting the one obvious line:
 
 ![Splunk — SPL search with stats](docs/screenshots/splunk.png)
 
