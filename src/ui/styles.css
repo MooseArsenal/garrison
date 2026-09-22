@@ -256,6 +256,12 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 .work label.field:first-of-type { margin-top: 0; }
 .work select, .work input, .work textarea { width: 100%; }
 
+.docfield { margin-bottom: 12px; }
+.docfield-label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.docfield-help { font-size: 11px; color: var(--text-faint); line-height: 1.4; margin-bottom: 5px; }
+.docfield textarea { width: 100%; }
+.docfield textarea::placeholder { color: var(--text-faint); opacity: .7; font-style: italic; }
+
 .field-row { display: flex; gap: 8px; }
 .pri-picker { display: flex; gap: 6px; }
 .pri-picker button { flex: 1; padding: 7px 0; border-radius: 8px; background: var(--field); border: 1px solid var(--border); font-weight: 700; font-size: 12px; color: var(--text-dim); }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSession } from '../engine/session';
 import type { Disposition, EscalationTarget, Priority } from '../engine/types';
 import { Modal, useToast } from './common';
+import { docTemplate, REPORT_FIELDS, combineDoc, type DocField } from './docTemplates';
 
 const PRIORITIES: Priority[] = ['P1', 'P2', 'P3', 'P4'];
 const ESCALATIONS: { id: EscalationTarget; label: string }[] = [
@@ -23,6 +24,22 @@ export function WorkPanel({ onSubmit, goToQueue }: { onSubmit: () => void; goToQ
   const [confirm, setConfirm] = useState(false);
   const isSoc = s.tier === 'soc1' || s.tier === 'soc2';
   const isCirt = s.tier === 'cirt';
+
+  // Guided documentation fields: teach *what* to write. Their combined text is
+  // what the grader reads as the work notes / incident report.
+  const noteTpl = docTemplate(s.tier);
+  const [noteVals, setNoteVals] = useState<Record<string, string>>({});
+  const [reportVals, setReportVals] = useState<Record<string, string>>({});
+  function setNote(key: string, v: string) {
+    const next = { ...noteVals, [key]: v };
+    setNoteVals(next);
+    setTicket({ notes: combineDoc(noteTpl, next) });
+  }
+  function setReport(key: string, v: string) {
+    const next = { ...reportVals, [key]: v };
+    setReportVals(next);
+    setTicket({ report: combineDoc(REPORT_FIELDS, next) });
+  }
 
   function toggleNotify(id: string) {
     const has = ticket.notifications.includes(id);
@@ -46,17 +63,21 @@ export function WorkPanel({ onSubmit, goToQueue }: { onSubmit: () => void; goToQ
       </div>
 
       <div className="wsec">
-        <h3>Work notes</h3>
-        <textarea rows={6} placeholder="What you found, what you did, verification used, cause, and next steps. This is graded."
-          value={ticket.notes} onChange={(e) => setTicket({ notes: e.target.value })} />
-        <div className="tiny dim" style={{ marginTop: 4 }}>{ticket.notes.length} chars</div>
+        <h3>Work notes — document the case</h3>
+        <div className="tiny dim mb">Fill these the way a real {isSoc ? 'analyst' : isCirt ? 'responder' : 'technician'} would. Each field tells you what to capture.</div>
+        {noteTpl.map((f) => (
+          <DocInput key={f.key} f={f} value={noteVals[f.key] ?? ''} onChange={(v) => setNote(f.key, v)} />
+        ))}
+        <div className="tiny dim" style={{ marginTop: 4 }}>{ticket.notes.length} chars documented</div>
       </div>
 
       {isCirt && s.intake.kind === 'incident' && (
         <div className="wsec">
           <h3>Incident report</h3>
-          <textarea rows={6} placeholder="Timeline, root cause, containment/recovery, and follow-up actions with owners."
-            value={ticket.report} onChange={(e) => setTicket({ report: e.target.value })} />
+          <div className="tiny dim mb">The write-up leadership and Legal read after the incident. Keep it factual.</div>
+          {REPORT_FIELDS.map((f) => (
+            <DocInput key={f.key} f={f} value={reportVals[f.key] ?? ''} onChange={(v) => setReport(f.key, v)} />
+          ))}
         </div>
       )}
 
@@ -137,6 +158,16 @@ export function WorkPanel({ onSubmit, goToQueue }: { onSubmit: () => void; goToQ
           {ticket.disposition === 'pending' && s.closure.disposition !== 'pending' && <p className="small" style={{ color: 'var(--amber)' }}>⚠ Disposition is still "pending". Set Resolve / Escalate / Reject unless the case truly awaits an external party.</p>}
         </Modal>
       )}
+    </div>
+  );
+}
+
+function DocInput({ f, value, onChange }: { f: DocField; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="docfield">
+      <label className="docfield-label">{f.label}</label>
+      <div className="docfield-help">{f.help}</div>
+      <textarea rows={f.rows ?? 2} placeholder={'e.g. ' + f.placeholder} value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
 }

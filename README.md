@@ -8,12 +8,14 @@ A browser-based training simulator that takes you from the IT help desk to the i
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-3E6B72?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5-9A7B3A?logo=vite&logoColor=white)
-![Scenarios](https://img.shields.io/badge/scenarios-48-3E7A5A)
+![Scenarios](https://img.shields.io/badge/scenarios-96-3E7A5A)
 ![Ladder](https://img.shields.io/badge/ladder-SD%20%E2%86%92%20SOC%20%E2%86%92%20CIRT-B0472C)
 
 > **What this is — and isn't.** Garrison is a **learning simulator**. Everything happens against a fictional company (Kestrel Dynamics) modelled entirely in the browser. It **connects to nothing**, touches no real systems, accounts, or networks, and stores your progress only in your own browser. It's a flight simulator for IT and security operations — practise the decisions before a real ticket, caller, or incident is on the line.
 
-![Garrison — the career ladder](docs/screenshots/home.png)
+Cases arrive in a **shift queue** — email, SMS, Sametime, phone, self-service portal, and Splunk / CrowdStrike / DLP alerts — just like a real desk. You work what's at the top; the rest waits.
+
+![Garrison — the Service Desk shift queue](docs/screenshots/home.png)
 
 ---
 
@@ -49,11 +51,13 @@ Breaking into cybersecurity has a chicken-and-egg problem: every job wants exper
 
 | Tier | Scenarios | What you practise |
 |------|:---------:|-------------------|
-| **Service Desk I** | 12 | Password/MFA resets, lockouts, hardware & printers, Wi-Fi, onboarding, phishing triage, found-USB — verify the caller, fix it, or escalate cleanly. |
-| **Service Desk II** | 10 | Driver/BSOD, cached-credential VPN traps, Kerberos clock skew, Group Policy, mapped drives, access control, least-privilege pushback. |
-| **SOC Analyst I** | 10 | Alert triage: true / false / benign classification, phishing campaigns, endpoint malware, password spray, suspicious sign-ins, blocked C2. |
-| **SOC Analyst II** | 8 | Investigation & hunting: BEC, lateral movement, OAuth-consent abuse, web-app attacks, Kerberoasting, DNS tunneling, cross-estate scoping. |
-| **CIRT** | 8 | Incident command: ransomware, domain compromise, insider sabotage, wire fraud, lost-device breach, third-party/MSP compromise — lifecycle, evidence, and who to notify (and when). |
+| **Service Desk I** | 24 | Password/MFA resets, lockouts, hardware & printers, Wi-Fi, onboarding & offboarding, phishing triage, vishing, found-USB — verify the caller, fix it, or escalate cleanly. |
+| **Service Desk II** | 20 | Driver/BSOD, cached-credential VPN traps, Kerberos clock skew, Group Policy, mapped drives, BitLocker recovery, access control, least-privilege pushback. |
+| **SOC Analyst I** | 20 | Alert triage: true / false / benign classification, phishing campaigns, endpoint malware, password spray, MFA fatigue, credential-theft tools, ransomware canaries. |
+| **SOC Analyst II** | 16 | Investigation & hunting: BEC, lateral movement, OAuth-consent & AiTM token theft, web-app attacks, Kerberoasting, DNS tunneling, data staging, cross-estate scoping. |
+| **CIRT** | 16 | Incident command: ransomware & double extortion, domain & tenant compromise, insider sabotage, wire fraud, lost-device breach, OT/plant, APT dwell — lifecycle, evidence, and who to notify (and when). |
+
+**96 scenarios** in all, and the roster keeps growing.
 
 ---
 
@@ -100,6 +104,12 @@ Every case is scored purely from **what you did** — the log of your actions pl
 
 Taking a forbidden action (say, sending a password to a personal email, or notifying regulators without Legal) caps your score no matter how much else you got right — because it would in real life.
 
+### Documentation is guided
+
+New to a help desk or SOC and unsure *what* to write down? The work-notes panel isn't a blank box — it's the field template a real analyst fills in, with a one-line prompt under each field telling you what belongs there (and an example). Service Desk, SOC, and CIRT each get the template that fits the role, so you learn the shape of good documentation as you go.
+
+![Guided case documentation](docs/screenshots/documentation.png)
+
 ---
 
 ## Project structure
@@ -124,7 +134,7 @@ Scenarios are **data**. Each one patches a copy of the world and declares, as ma
 
 ### Every scenario is provably winnable
 
-`npm run validate` synthesises the ideal analyst's actions from each scenario's own grading rules, runs the real grading engine, and asserts the run passes with a high score — while an empty attempt fails. If a scenario can't be completed with its documented tools, or grades wrong, the check fails instead of teaching you something false. All 48 pass.
+`npm run validate` synthesises the ideal analyst's actions from each scenario's own grading rules, runs the real grading engine, and asserts the run passes with a high score — while an empty attempt fails. If a scenario can't be completed with its documented tools, or grades wrong, the check fails instead of teaching you something false. All 96 pass.
 
 ---
 
