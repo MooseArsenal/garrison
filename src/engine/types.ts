@@ -427,7 +427,7 @@ export interface TicketIntake {
   subject: string;
   body: string;
   requester: string; // user id
-  channel: 'portal' | 'phone' | 'email' | 'walk-up' | 'chat';
+  channel: 'portal' | 'phone' | 'email' | 'walk-up' | 'chat' | 'im' | 'sms';
   priority: Priority; // as submitted
   category: string; // as submitted (may be wrong)
   openedAt: string;
