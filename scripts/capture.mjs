@@ -149,5 +149,20 @@ await page.evaluate(() => { const o = [...document.querySelectorAll('.card .repl
 await sleep(300);
 await shot('lesson');
 
+// 9) TEACHER — assignment builder
+await page.goto(`${BASE}#teach`, { waitUntil: 'networkidle2' });
+await sleep(400);
+await page.evaluate(() => {
+  const setInput = (el, v) => { const p = el.tagName === 'TEXTAREA' ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(p, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); };
+  const sel = document.querySelector('.card select'); if (sel) { Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').set.call(sel, 'soc1-triage'); sel.dispatchEvent(new Event('change', { bubbles: true })); }
+  const ti = [...document.querySelectorAll('input')].find((i) => (i.placeholder || '').includes('Week 3')); if (ti) setInput(ti, 'Week 3 — SOC triage');
+  const fi = [...document.querySelectorAll('input')].find((i) => (i.placeholder || '').includes('Prof')); if (fi) setInput(fi, 'Prof. Vance');
+  const nt = [...document.querySelectorAll('textarea')].find((t) => (t.placeholder || '').includes('Due Friday')); if (nt) setInput(nt, 'Read the SOC Triage 101 path first, then clear all three cases at 70+. Due Friday.');
+});
+await sleep(300);
+await page.evaluate(() => { const b = [...document.querySelectorAll('button')].find((x) => x.textContent.includes('Copy assignment link')); b?.click(); });
+await sleep(300);
+await shot('teacher');
+
 await browser.close();
 console.log('done');

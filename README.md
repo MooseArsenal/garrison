@@ -46,6 +46,7 @@ Breaking into cybersecurity has a chicken-and-egg problem: every job wants exper
 - **Industry-standard tools** — the workflows and terminology transfer straight to a real SOC.
 - **Practice like a shift** — an endless mode deals case after case with a running score and streak, then an end-of-shift summary, so you can drill without clearing tiers.
 - **Guided learning paths** — ordered curricula that pair each SOP (with a knowledge check) with the cases that apply it, so you learn the concept before you're tested on it.
+- **Assign & grade** — a teacher console builds an assignment into a shareable link and decodes returned receipts in a gradebook, all with no backend or accounts.
 
 ---
 
@@ -72,6 +73,20 @@ Not sure where to start? **Learning paths** are guided mini-curricula that pair 
 Each lesson is a real SOP with a one-question check that reinforces the rule:
 
 ![Lesson with knowledge check](docs/screenshots/lesson.png)
+
+---
+
+## Assign & grade (for teachers)
+
+Garrison has a **Teacher console** for instructors and study groups — with no backend, no accounts, and no student data leaving the browser.
+
+- **Build** an assignment from a learning path or a hand-picked set of cases, set a title, instructions, and a pass mark, and get a **shareable link**. The whole assignment is encoded in the URL, so there's nothing to host.
+- Students open the link, work the cases in **assignment mode**, then generate a **submission receipt** — a short code they send back however the class already communicates (email, Classroom, Teams).
+- The **gradebook** decodes pasted receipts into a roster with per-case scores.
+
+![Teacher console — assignment builder](docs/screenshots/teacher.png)
+
+Receipts are self-reported (practice-grade), so this fits homework and study groups rather than proctored exams — but it lets a mentor point someone at exactly the right cases and see how they did, with zero setup.
 
 ---
 
