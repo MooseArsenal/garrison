@@ -98,5 +98,44 @@ await page.evaluate(() => { const r = document.querySelector('table.data tbody t
 await sleep(700);
 await shot('falcon');
 
+// 7) REPORT CARD — seed a sample training history, then capture the report
+await page.goto(BASE, { waitUntil: 'networkidle2' });
+await page.evaluate(() => {
+  const s = (t, i, se, c, d, pr, e) => ({ technical: t, investigation: i, security: se, communication: c, documentation: d, process: pr, efficiency: e });
+  const now = Date.now(); const iso = (da) => new Date(now - da * 86400000).toISOString();
+  const scen = {
+    'sd1-01': { scenarioId: 'sd1-01', best: 96, attempts: 2, passed: true, lastPlayed: iso(6) },
+    'sd1-02': { scenarioId: 'sd1-02', best: 88, attempts: 1, passed: true, lastPlayed: iso(6) },
+    'sd1-04': { scenarioId: 'sd1-04', best: 79, attempts: 2, passed: true, lastPlayed: iso(5) },
+    'sd1-06': { scenarioId: 'sd1-06', best: 91, attempts: 1, passed: true, lastPlayed: iso(5) },
+    'sd1-12': { scenarioId: 'sd1-12', best: 84, attempts: 1, passed: true, lastPlayed: iso(4) },
+    'sd2-01': { scenarioId: 'sd2-01', best: 90, attempts: 1, passed: true, lastPlayed: iso(3) },
+    'sd2-04': { scenarioId: 'sd2-04', best: 72, attempts: 3, passed: true, lastPlayed: iso(3) },
+    'soc1-01': { scenarioId: 'soc1-01', best: 91, attempts: 1, passed: true, lastPlayed: iso(2) },
+    'soc1-04': { scenarioId: 'soc1-04', best: 68, attempts: 2, passed: false, lastPlayed: iso(1) },
+    'soc2-02': { scenarioId: 'soc2-02', best: 74, attempts: 1, passed: true, lastPlayed: iso(1) },
+  };
+  const history = [
+    { scenarioId: 'sd1-01', score: 82, at: iso(6), skills: s(90, 70, 80, 80, 80, 90, 80) },
+    { scenarioId: 'sd1-01', score: 96, at: iso(6), skills: s(100, 80, 100, 100, 100, 100, 100) },
+    { scenarioId: 'sd1-02', score: 88, at: iso(6), skills: s(90, 85, 90, 90, 80, 90, 90) },
+    { scenarioId: 'sd1-04', score: 71, at: iso(5), skills: s(80, 60, 70, 75, 70, 70, 80) },
+    { scenarioId: 'sd1-04', score: 79, at: iso(5), skills: s(85, 70, 75, 80, 80, 80, 80) },
+    { scenarioId: 'sd1-06', score: 91, at: iso(5), skills: s(95, 80, 90, 90, 90, 95, 90) },
+    { scenarioId: 'sd1-12', score: 84, at: iso(4), skills: s(80, 75, 95, 85, 80, 90, 80) },
+    { scenarioId: 'sd2-01', score: 90, at: iso(3), skills: s(95, 85, 85, 90, 90, 90, 90) },
+    { scenarioId: 'sd2-04', score: 72, at: iso(3), skills: s(78, 65, 72, 75, 70, 72, 78) },
+    { scenarioId: 'soc1-01', score: 91, at: iso(2), skills: s(90, 88, 92, 90, 92, 92, 90) },
+    { scenarioId: 'soc1-04', score: 68, at: iso(1), skills: s(75, 60, 65, 70, 66, 68, 72) },
+    { scenarioId: 'soc2-02', score: 74, at: iso(1), skills: s(80, 68, 72, 75, 70, 74, 78) },
+  ];
+  localStorage.setItem('garrison.progress.v1', JSON.stringify({ scenarios: scen, history }));
+  localStorage.setItem('garrison.settings.v1', JSON.stringify({ unlockAll: true, hintsEnabled: true, playerName: 'Shamus Johnson' }));
+});
+await page.goto(`${BASE}#report`, { waitUntil: 'networkidle2' });
+await sleep(800);
+await page.screenshot({ path: `${OUT}/report.png`, fullPage: true });
+console.log('captured report');
+
 await browser.close();
 console.log('done');

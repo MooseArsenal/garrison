@@ -110,6 +110,12 @@ New to a help desk or SOC and unsure *what* to write down? The work-notes panel 
 
 ![Guided case documentation](docs/screenshots/documentation.png)
 
+### Track your progress
+
+A shareable **training report** — overall score, a seven-skill radar, strengths versus focus areas, per-tier progress, and recent activity — that you can print or save as PDF. It's a self-reported practice record generated in your own browser, not a verified credential, but it's a concrete way to show an interviewer what you've been drilling.
+
+![Garrison — training report](docs/screenshots/report.png)
+
 ---
 
 ## Project structure

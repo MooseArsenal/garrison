@@ -15,7 +15,7 @@ const TIER_DESC: Record<Tier, string> = {
 
 const QUEUE_SIZE = 5;
 
-export function Home({ onPlay }: { onPlay: (id: string) => void }) {
+export function Home({ onPlay, onReport }: { onPlay: (id: string) => void; onReport: () => void }) {
   const [progress, setProgress] = useState(loadProgress());
   const [settings, setSettings] = useState<Settings>(loadSettings());
   const [showSettings, setShowSettings] = useState(false);
@@ -66,7 +66,10 @@ export function Home({ onPlay }: { onPlay: (id: string) => void }) {
             <div className="sub">Shift console · Service Desk → SOC → CIRT</div>
           </div>
         </div>
-        <button className="btn ghost sm" onClick={() => setShowSettings(true)}>⚙ Settings</button>
+        <div className="flex" style={{ gap: 8 }}>
+          <button className="btn ghost sm" onClick={onReport}>📊 Report card</button>
+          <button className="btn ghost sm" onClick={() => setShowSettings(true)}>⚙ Settings</button>
+        </div>
       </div>
 
       <div className="stat-row">
