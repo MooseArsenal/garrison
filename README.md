@@ -13,7 +13,7 @@ A browser-based training simulator that takes you from the IT help desk to the i
 
 > **What this is — and isn't.** Garrison is a **learning simulator**. Everything happens against a fictional company (Kestrel Dynamics) modelled entirely in the browser. It **connects to nothing**, touches no real systems, accounts, or networks, and stores your progress only in your own browser. It's a flight simulator for IT and security operations — practise the decisions before a real ticket, caller, or incident is on the line.
 
-Cases arrive in a **shift queue** — email, SMS, Sametime, phone, self-service portal, and Splunk / CrowdStrike / DLP alerts — just like a real desk. You work what's at the top; the rest waits.
+Cases arrive in a **shift queue** — email, SMS, Sametime, phone, self-service portal, and Splunk / CrowdStrike / DLP alerts — just like a real desk. You work what's at the top; the rest waits. Or hit **▶ Start shift** for an endless run that deals you case after case with a running score and streak, then a shift summary.
 
 ![Garrison — the Service Desk shift queue](docs/screenshots/home.png)
 
@@ -44,6 +44,7 @@ Breaking into cybersecurity has a chicken-and-egg problem: every job wants exper
 - **Decisions, not trivia** — verify, investigate, contain, document, escalate, and communicate. Escalating correctly is a *win*; some cases are deliberately above your tier.
 - **Honest grading** — seven skills scored per case (technical, investigation, security judgment, communication, documentation, process, efficiency) with a full debrief against a competent analyst's approach.
 - **Industry-standard tools** — the workflows and terminology transfer straight to a real SOC.
+- **Practice like a shift** — an endless mode deals case after case with a running score and streak, then an end-of-shift summary, so you can drill without clearing tiers.
 
 ---
 

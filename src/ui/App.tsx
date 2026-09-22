@@ -3,9 +3,10 @@ import { ToastProvider } from './common';
 import { Home } from './Home';
 import { Play } from './Play';
 import { Report } from './Report';
+import { Shift } from './Shift';
 import { getScenario } from '../scenarios';
 
-type Route = { name: 'home' } | { name: 'play'; scenarioId: string } | { name: 'report' };
+type Route = { name: 'home' } | { name: 'play'; scenarioId: string } | { name: 'report' } | { name: 'shift'; scope: string[]; label: string };
 
 function routeFromHash(): Route {
   if (typeof location !== 'undefined' && location.hash === '#report') return { name: 'report' };
@@ -27,8 +28,9 @@ export function App() {
   }
   return (
     <ToastProvider>
-      {route.name === 'home' && <Home onPlay={(id) => go({ name: 'play', scenarioId: id })} onReport={() => go({ name: 'report' })} />}
+      {route.name === 'home' && <Home onPlay={(id) => go({ name: 'play', scenarioId: id })} onReport={() => go({ name: 'report' })} onStartShift={(scope, label) => go({ name: 'shift', scope, label })} />}
       {route.name === 'report' && <Report onExit={() => go({ name: 'home' })} />}
+      {route.name === 'shift' && <Shift scope={route.scope} label={route.label} onExit={() => go({ name: 'home' })} />}
       {route.name === 'play' && <Play scenarioId={route.scenarioId} onExit={() => go({ name: 'home' })} onReplay={() => go({ name: 'home' })} />}
     </ToastProvider>
   );

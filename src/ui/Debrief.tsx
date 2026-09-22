@@ -3,7 +3,11 @@ import { useSession } from '../engine/session';
 import { SKILL_LABELS, type GradeResult } from '../engine/types';
 import { scoreColor } from './common';
 
-export function Debrief({ result, onExit, onRetry }: { result: GradeResult; onExit: () => void; onRetry: () => void }) {
+export function Debrief({ result, onExit, onRetry, shift, onNext, onEndShift }: {
+  result: GradeResult; onExit: () => void; onRetry: () => void;
+  shift?: { caseNum: number; avg: number | null; streak: number; label: string };
+  onNext?: () => void; onEndShift?: () => void;
+}) {
   const { scenario: s, ticket } = useSession();
   const r = result;
   const chosenReply = s.replies.find((x) => x.id === ticket.replyId);
@@ -13,9 +17,20 @@ export function Debrief({ result, onExit, onRetry }: { result: GradeResult; onEx
   return (
     <div className="debrief">
       <div className="flex" style={{ justifyContent: 'space-between', marginBottom: 18 }}>
-        <button className="btn ghost sm" onClick={onExit}>← Menu</button>
-        <button className="btn sm" onClick={onRetry}>↻ Retry scenario</button>
+        {shift ? <button className="btn ghost sm" onClick={onEndShift}>■ End shift</button> : <button className="btn ghost sm" onClick={onExit}>← Menu</button>}
+        <div className="flex" style={{ gap: 8 }}>
+          <button className="btn sm" onClick={onRetry}>↻ Retry</button>
+          {shift && onNext && <button className="btn primary sm" onClick={onNext}>Next case →</button>}
+        </div>
       </div>
+      {shift && (
+        <div className="card" style={{ background: 'var(--surface-2)', borderColor: 'var(--brass)' }}>
+          <div className="flex wrap" style={{ justifyContent: 'space-between' }}>
+            <strong>🎧 {shift.label} shift</strong>
+            <span className="small dim">case {shift.caseNum}{shift.avg != null ? ` · running avg ${shift.avg}` : ''}{shift.streak > 0 ? ` · 🔥 ${shift.streak} in a row` : ''}</span>
+          </div>
+        </div>
+      )}
 
       <div className="score-hero">
         <div className="ring" style={{ background: ring, borderRadius: '50%' }}>
@@ -93,8 +108,18 @@ export function Debrief({ result, onExit, onRetry }: { result: GradeResult; onEx
       </div>
 
       <div className="flex" style={{ justifyContent: 'center', gap: 12, marginTop: 20 }}>
-        <button className="btn" onClick={onExit}>Back to menu</button>
-        <button className="btn primary" onClick={onRetry}>Retry scenario</button>
+        {shift ? (
+          <>
+            <button className="btn" onClick={onEndShift}>End shift &amp; see summary</button>
+            <button className="btn" onClick={onRetry}>Retry this case</button>
+            {onNext && <button className="btn primary" onClick={onNext}>Next case →</button>}
+          </>
+        ) : (
+          <>
+            <button className="btn" onClick={onExit}>Back to menu</button>
+            <button className="btn primary" onClick={onRetry}>Retry scenario</button>
+          </>
+        )}
       </div>
     </div>
   );

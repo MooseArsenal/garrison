@@ -13,7 +13,16 @@ import { TOOL_COMPONENTS } from './tools';
 
 const BASE = buildWorld();
 
-export function Play({ scenarioId, onExit }: { scenarioId: string; onExit: () => void; onReplay: (id: string) => void }) {
+export interface ShiftView { caseNum: number; avg: number | null; streak: number; label: string; }
+
+export function Play({ scenarioId, onExit, shift, onNext, onEndShift }: {
+  scenarioId: string;
+  onExit: () => void;
+  onReplay?: (id: string) => void;
+  shift?: ShiftView;
+  onNext?: (r: GradeResult) => void;
+  onEndShift?: (r: GradeResult) => void;
+}) {
   const scenario = getScenario(scenarioId)!;
   const toast = useToast();
   const worldRef = useRef<World | null>(null);
@@ -33,6 +42,15 @@ export function Play({ scenarioId, onExit }: { scenarioId: string; onExit: () =>
   const [result, setResult] = useState<GradeResult | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const firedTimers = useRef<Set<number>>(new Set());
+
+  function retry() {
+    const w = cloneWorld(BASE); scenario.setup(w); worldRef.current = w;
+    actionsRef.current = []; uiRef.current = {}; firedTimers.current = new Set();
+    startRef.current = Date.now();
+    setTicketState(initialTicket(scenario));
+    setNotices([]); setResult(null); setActiveTool('queue'); setElapsed(0);
+    setPhase('brief'); setVersion((v) => v + 1);
+  }
 
   const tools = useMemo(() => {
     const base = TIER_TOOLS[scenario.tier] ?? [];
@@ -103,7 +121,10 @@ export function Play({ scenarioId, onExit }: { scenarioId: string; onExit: () =>
   if (phase === 'debrief' && result) {
     return (
       <SessionContext.Provider value={session}>
-        <Debrief result={result} onExit={onExit} onRetry={() => window.location.reload()} />
+        <Debrief result={result} onExit={onExit} onRetry={retry}
+          shift={shift}
+          onNext={onNext ? () => onNext(result) : undefined}
+          onEndShift={onEndShift ? () => onEndShift(result) : undefined} />
       </SessionContext.Provider>
     );
   }
@@ -119,6 +140,7 @@ export function Play({ scenarioId, onExit }: { scenarioId: string; onExit: () =>
           <button className="btn ghost home-btn" title="Exit to menu" onClick={() => { if (confirm('Exit without submitting? Progress on this scenario is lost.')) onExit(); }}>←</button>
           <div className="tt">{scenario.title}<small>{TIER_LABELS[scenario.tier]}</small></div>
           <div className="spacer" />
+          {shift && <span className="shift-badge">🎧 {shift.label} · case {shift.caseNum}{shift.avg != null ? ` · avg ${shift.avg}` : ''}{shift.streak > 0 ? ` · 🔥${shift.streak}` : ''}</span>}
           <span className="timer">⏱ {mm}:{ss}</span>
         </div>
 

@@ -15,7 +15,7 @@ const TIER_DESC: Record<Tier, string> = {
 
 const QUEUE_SIZE = 5;
 
-export function Home({ onPlay, onReport }: { onPlay: (id: string) => void; onReport: () => void }) {
+export function Home({ onPlay, onReport, onStartShift }: { onPlay: (id: string) => void; onReport: () => void; onStartShift: (scope: string[], label: string) => void }) {
   const [progress, setProgress] = useState(loadProgress());
   const [settings, setSettings] = useState<Settings>(loadSettings());
   const [showSettings, setShowSettings] = useState(false);
@@ -104,9 +104,14 @@ export function Home({ onPlay, onReport }: { onPlay: (id: string) => void; onRep
             <h2>Your queue — {TIER_LABELS[tier]}</h2>
             <div className="small dim">{TIER_DESC[tier]}</div>
           </div>
-          <div className="queue-count">
-            <span className="qn">{unpassed.length}</span>
-            <span className="ql">in queue</span>
+          <div className="flex" style={{ gap: 14 }}>
+            {isUnlocked && (
+              <button className="btn sm" title="Work a continuous stream of cases from this tier" onClick={() => onStartShift(scenarios.map((s) => s.id), TIER_LABELS[tier])}>▶ Start shift</button>
+            )}
+            <div className="queue-count">
+              <span className="qn">{unpassed.length}</span>
+              <span className="ql">in queue</span>
+            </div>
           </div>
         </div>
 
