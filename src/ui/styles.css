@@ -387,6 +387,21 @@ table.data tr.warn td { background: var(--wash-med); }
 .vt-ratio.mal { color: var(--red); }
 .vt-ratio.clean { color: var(--green); }
 
+/* ── learning paths ── */
+.path-steps { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.path-step { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; box-shadow: var(--shadow); }
+.path-step.locked { opacity: .55; }
+.path-step.done { border-color: #A6C2B0; }
+.path-step .ps-marker { width: 34px; height: 34px; flex-shrink: 0; display: grid; place-items: center; border-radius: 9px; background: var(--field); border: 1px solid var(--border); font-size: 16px; }
+.path-step.done .ps-marker { background: var(--wash-low); color: var(--green); border-color: #A6C2B0; font-weight: 800; }
+.path-step .ps-body { flex: 1; min-width: 0; }
+.path-step .ps-kind { font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-faint); }
+.path-step .ps-title { font-family: var(--display); font-weight: 600; font-size: 14.5px; }
+.path-step .ps-blurb { font-size: 12px; color: var(--text-faint); }
+.path-step .ps-action { flex-shrink: 0; }
+.reply-opt.check-correct { border-color: var(--green); background: var(--wash-low); }
+.reply-opt.check-wrong { border-color: var(--red); background: var(--wash-crit); }
+
 /* ── report card ── */
 .report { max-width: 900px; margin: 0 auto; padding: 20px 24px 80px; position: relative; z-index: 1; }
 .report-actions { display: flex; justify-content: space-between; margin-bottom: 14px; }

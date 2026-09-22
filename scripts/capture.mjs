@@ -137,5 +137,17 @@ await sleep(800);
 await page.screenshot({ path: `${OUT}/report.png`, fullPage: true });
 console.log('captured report');
 
+// 8) LEARNING PATH — detail view and a lesson with its knowledge check
+await page.goto(`${BASE}#learn`, { waitUntil: 'networkidle2' });
+await sleep(500);
+await clickText('.scen-card .title', 'SOC Triage 101');
+await sleep(400);
+await shot('learn');
+await clickText('button', 'Read lesson');
+await sleep(400);
+await page.evaluate(() => { const o = [...document.querySelectorAll('.card .reply-opt')]; if (o[2]) o[2].click(); }); // KB-0013 answer
+await sleep(300);
+await shot('lesson');
+
 await browser.close();
 console.log('done');

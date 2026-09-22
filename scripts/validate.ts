@@ -14,6 +14,7 @@ import { buildWorld, cloneWorld } from '../src/engine/world';
 import { grade } from '../src/engine/grading';
 import { initialTicket } from '../src/engine/session';
 import { ALL_SCENARIOS } from '../src/scenarios';
+import { LEARNING_PATHS } from '../src/engine/paths';
 
 const BASE = buildWorld();
 
@@ -223,6 +224,19 @@ for (const s of ALL_SCENARIOS) {
   }
 }
 
+// ---- learning-path references ----
+let pathProblems = 0;
+for (const p of LEARNING_PATHS) {
+  p.steps.forEach((step, i) => {
+    if (step.kind === 'lesson') {
+      if (!step.kb || !kbIds.has(step.kb)) { console.log(`\n✗ path ${p.id}#${i}: missing KB ${step.kb}`); pathProblems++; }
+    } else if (!step.scenarioId || !ALL_SCENARIOS.some((s) => s.id === step.scenarioId)) {
+      console.log(`\n✗ path ${p.id}#${i}: missing scenario ${step.scenarioId}`); pathProblems++;
+    }
+  });
+}
+
 console.log(`\n${'='.repeat(60)}`);
 console.log(`${ALL_SCENARIOS.length} scenarios checked, ${failures} with problems.`);
-process.exit(failures ? 1 : 0);
+console.log(`${LEARNING_PATHS.length} learning paths checked, ${pathProblems} bad references.`);
+process.exit(failures || pathProblems ? 1 : 0);

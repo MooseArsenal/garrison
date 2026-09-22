@@ -15,7 +15,7 @@ const TIER_DESC: Record<Tier, string> = {
 
 const QUEUE_SIZE = 5;
 
-export function Home({ onPlay, onReport, onStartShift }: { onPlay: (id: string) => void; onReport: () => void; onStartShift: (scope: string[], label: string) => void }) {
+export function Home({ onPlay, onReport, onLearn, onStartShift }: { onPlay: (id: string) => void; onReport: () => void; onLearn: () => void; onStartShift: (scope: string[], label: string) => void }) {
   const [progress, setProgress] = useState(loadProgress());
   const [settings, setSettings] = useState<Settings>(loadSettings());
   const [showSettings, setShowSettings] = useState(false);
@@ -67,6 +67,7 @@ export function Home({ onPlay, onReport, onStartShift }: { onPlay: (id: string) 
           </div>
         </div>
         <div className="flex" style={{ gap: 8 }}>
+          <button className="btn ghost sm" onClick={onLearn}>📚 Learn</button>
           <button className="btn ghost sm" onClick={onReport}>📊 Report card</button>
           <button className="btn ghost sm" onClick={() => setShowSettings(true)}>⚙ Settings</button>
         </div>

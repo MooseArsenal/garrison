@@ -13,6 +13,7 @@ export interface Settings {
 export interface ProgressStore {
   scenarios: Record<string, ScenarioProgress>;
   history: { scenarioId: string; score: number; at: string; skills: Partial<Record<Skill, number>> }[];
+  lessons: Record<string, boolean>; // learning-path lesson steps completed, keyed "pathId#stepIndex"
 }
 
 function safeParse<T>(raw: string | null, fallback: T): T {
@@ -21,7 +22,15 @@ function safeParse<T>(raw: string | null, fallback: T): T {
 }
 
 export function loadProgress(): ProgressStore {
-  return safeParse<ProgressStore>(localStorage.getItem(KEY), { scenarios: {}, history: [] });
+  return safeParse<ProgressStore>(localStorage.getItem(KEY), { scenarios: {}, history: [], lessons: {} });
+}
+
+export function markLesson(key: string): ProgressStore {
+  const p = loadProgress();
+  if (!p.lessons) p.lessons = {};
+  p.lessons[key] = true;
+  saveProgress(p);
+  return p;
 }
 
 export function saveProgress(p: ProgressStore): void {

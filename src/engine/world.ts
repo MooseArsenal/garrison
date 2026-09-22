@@ -421,7 +421,7 @@ function mkAssets(hosts: Host[]): Asset[] {
 // Knowledge base (SOPs). These are the "rules" the grading enforces; make sure
 // scenarios reference them so trainees learn to read the KB.
 // ----------------------------------------------------------------------------
-const KB: KbArticle[] = [
+export const KB: KbArticle[] = [
   {
     id: 'KB-0001', title: 'SOP: Caller identity verification (REQUIRED before any account change)', tags: ['identity', 'verification', 'password', 'unlock', 'security', 'sop'],
     body: `Before performing ANY account action (password reset, unlock, MFA reset, group change, mailbox delegation) you MUST verify the caller.

@@ -45,6 +45,7 @@ Breaking into cybersecurity has a chicken-and-egg problem: every job wants exper
 - **Honest grading** — seven skills scored per case (technical, investigation, security judgment, communication, documentation, process, efficiency) with a full debrief against a competent analyst's approach.
 - **Industry-standard tools** — the workflows and terminology transfer straight to a real SOC.
 - **Practice like a shift** — an endless mode deals case after case with a running score and streak, then an end-of-shift summary, so you can drill without clearing tiers.
+- **Guided learning paths** — ordered curricula that pair each SOP (with a knowledge check) with the cases that apply it, so you learn the concept before you're tested on it.
 
 ---
 
@@ -59,6 +60,18 @@ Breaking into cybersecurity has a chicken-and-egg problem: every job wants exper
 | **CIRT** | 16 | Incident command: ransomware & double extortion, domain & tenant compromise, insider sabotage, wire fraud, lost-device breach, OT/plant, APT dwell — lifecycle, evidence, and who to notify (and when). |
 
 **96 scenarios** in all, and the roster keeps growing.
+
+---
+
+## Learning paths
+
+Not sure where to start? **Learning paths** are guided mini-curricula that pair the playbook with practice: read the relevant SOP, pass a quick knowledge check, then work the cases that apply it. Steps unlock in order, so you build the concept before you're tested on it. There are paths for each tier, from *Service Desk Foundations* to *Incident Command*.
+
+![Learning path detail](docs/screenshots/learn.png)
+
+Each lesson is a real SOP with a one-question check that reinforces the rule:
+
+![Lesson with knowledge check](docs/screenshots/lesson.png)
 
 ---
 
