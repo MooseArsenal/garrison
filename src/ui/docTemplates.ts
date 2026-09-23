@@ -12,20 +12,20 @@ export interface DocField {
 // concatenated (label: value) into the graded work notes, so the same content
 // scores the same — but a newcomer is shown *what* to document and why.
 const SERVICE_DESK: DocField[] = [
-  { key: 'summary', label: 'Summary', help: 'One line: what the user reported and how it ended.', placeholder: 'AP user locked out before payroll; verified, unlocked and reset — root cause was a saved password on her phone.' },
-  { key: 'verification', label: 'Identity verification', help: 'For ANY account change, how you confirmed who you were dealing with — two factors.', placeholder: 'Employee ID E10105 + callback to the number on record.' },
-  { key: 'cause', label: 'Cause / diagnosis', help: 'The real root cause you found, not just the symptom.', placeholder: 'Old password cached in the iPhone mail app kept locking the account.' },
-  { key: 'action', label: 'Action taken', help: 'What you actually did to fix it or move it forward.', placeholder: 'Unlocked account; reset password with must-change; had her update the saved password on her phone.' },
-  { key: 'outcome', label: 'Outcome / next steps', help: 'Resolved, or who it went to and what they need.', placeholder: 'Resolved and confirmed she could log in. No further action.', rows: 2 },
+  { key: 'contact', label: 'Who you spoke to', help: 'Who you contacted and how — and, for any account change, how you verified them (two factors).', placeholder: 'Jenna Morales (Accounts Payable), by phone. Verified: employee ID E10105 + callback to the number on record.', rows: 2 },
+  { key: 'reported', label: 'What was discussed / reported', help: "The problem in the caller's own words, plus the key details you got by asking.", placeholder: 'Locked out right before payroll. The failed logins came from her own laptop and iPhone — not a strange IP.', rows: 2 },
+  { key: 'found', label: 'What you found', help: 'Your diagnosis — the real cause, not just the symptom.', placeholder: 'Old password still saved in her iPhone mail app kept re-locking the account.', rows: 2 },
+  { key: 'actions', label: 'What actions you took', help: 'The steps you actually performed to fix it or move it forward.', placeholder: 'Unlocked the account; reset the password (must change at next logon); had her update the saved password on her phone.', rows: 2 },
+  { key: 'outcome', label: 'Outcome / next steps', help: 'Resolved and confirmed, or who it was escalated to and what they need.', placeholder: 'Resolved; confirmed she could log back in. No further action.', rows: 2 },
 ];
 
 const SOC: DocField[] = [
-  { key: 'summary', label: 'Summary', help: 'One line: what the alert was and your verdict.', placeholder: 'IDS scan alert from 10.10.10.70 — authorized weekly Nessus scan, benign true positive.' },
-  { key: 'evidence', label: 'Evidence reviewed', help: 'The artifacts you actually checked — SIEM queries, process tree, mail headers, sign-ins, intel lookups.', placeholder: 'Splunk auth+proxy for the host; Falcon process tree; VirusTotal on the IP and hash; user sign-in log.' },
-  { key: 'findings', label: 'Findings / indicators', help: 'What you concluded, with the IOCs — IPs, domains, hashes, users, hosts.', placeholder: 'WINWORD → powershell -enc → update-svc.exe (AppData) beaconing to 45.146.164.90 (Cobalt Strike C2). Single host, no lateral movement.' },
-  { key: 'actions', label: 'Actions / containment', help: 'What you did to contain — isolate, reset, block, purge — or why none was needed.', placeholder: 'Collected triage, network-contained the host, reset the user, blocked the C2 at the perimeter.' },
-  { key: 'rationale', label: 'Classification rationale', help: 'Why true / false / benign positive, and the severity you set.', placeholder: 'True positive, high — confirmed C2 execution. Not benign: no change ticket, unsigned dropper.' },
-  { key: 'next', label: 'Next steps / handoff', help: 'Who you escalated to and what they need, or the tuning you requested.', placeholder: 'Escalated to CIRT with the triage package and IOCs; ticket to Desktop to reimage after release.', rows: 2 },
+  { key: 'summary', label: 'Summary & verdict', help: 'One line: what the alert was and your classification.', placeholder: 'IDS scan alert from 10.10.10.70 — an authorized weekly Nessus scan. Benign true positive.', rows: 2 },
+  { key: 'evidence', label: 'What you checked (and who you contacted)', help: 'The artifacts you reviewed — SIEM queries, process tree, headers, sign-ins, intel — and anyone you confirmed with.', placeholder: 'Splunk auth+proxy for the host; Falcon process tree; VirusTotal on the IP/hash; confirmed the scan with the security team (change CHG-2291).', rows: 3 },
+  { key: 'findings', label: 'What you found (indicators)', help: 'Your conclusion, with the IOCs — IPs, domains, hashes, users, hosts.', placeholder: 'WINWORD → powershell -enc → update-svc.exe (AppData) beaconing to 45.146.164.90 (Cobalt Strike C2). Single host, no lateral movement.', rows: 3 },
+  { key: 'actions', label: 'What actions you took (containment)', help: 'What you did to contain — isolate, reset, block, purge — or why none was needed.', placeholder: 'Collected triage, network-contained the host, reset the user, blocked the C2 at the perimeter.', rows: 2 },
+  { key: 'rationale', label: 'Why (classification rationale)', help: 'Why true / false / benign positive, and the severity you set.', placeholder: 'True positive, high — confirmed C2 execution; not benign (no change ticket, unsigned dropper).', rows: 2 },
+  { key: 'next', label: 'Next steps / handoff', help: 'Who you escalated to and what they need, or the tuning you requested.', placeholder: 'Escalated to CIRT with the triage package and IOCs; ticketed Desktop to reimage after release.', rows: 2 },
 ];
 
 export function docTemplate(tier: Tier): DocField[] {

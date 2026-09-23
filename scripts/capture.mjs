@@ -65,10 +65,11 @@ await shot('directory');
 
 // 3b) DOCUMENTATION — guided work-notes fields (right panel)
 await fillDoc([
-  'AP user locked out before payroll; verified, unlocked and reset — root cause was a saved password on her phone.',
-  'Employee ID E10105 + callback to the number on record.',
-  'Old password cached in the iPhone mail app kept locking the account.',
-  'Unlocked account; reset password (must change); had her update the saved password on her phone.',
+  'Jenna Morales (Accounts Payable), by phone. Verified: employee ID E10105 + callback to the number on record.',
+  'Locked out right before payroll. The failed logins came from her own laptop and iPhone — not a strange IP.',
+  'Old password still saved in her iPhone mail app kept re-locking the account.',
+  'Unlocked the account; reset the password (must change at next logon); had her update the saved password on her phone.',
+  'Resolved; confirmed she could log back in. No further action.',
 ]);
 await page.evaluate(() => { const el = document.querySelector('.work'); if (el) el.scrollTop = 0; });
 await sleep(200);
