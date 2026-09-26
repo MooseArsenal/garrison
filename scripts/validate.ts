@@ -15,6 +15,7 @@ import { grade } from '../src/engine/grading';
 import { initialTicket } from '../src/engine/session';
 import { ALL_SCENARIOS } from '../src/scenarios';
 import { LEARNING_PATHS } from '../src/engine/paths';
+import { instantiate } from '../src/engine/instantiate';
 
 const BASE = buildWorld();
 
@@ -196,26 +197,27 @@ for (const s of ALL_SCENARIOS) {
   }
   if (s.intake.kind === 'alert' && !world.alerts.find((a) => a.id === s.intake.alertId)) problems.push(`alert ${s.intake.alertId} not created in setup`);
 
-  // perfect-run grade
-  try {
-    const { actions, ticket } = perfectRun(s);
-    const g = grade(s, world, actions, ticket, Math.max(1, s.estMinutes * 30));
-    if (!g.passed) problems.push(`PERFECT RUN FAILS (overall ${g.overall})`);
-    else if (g.overall < 85) problems.push(`perfect run low score ${g.overall}`);
-    // report which skills dragged it down when failing
-    if (g.overall < 85) {
-      const low = g.skills.filter((x) => x.score < 80).map((x) => `${x.skill}:${x.score}`);
-      if (low.length) problems.push('  low skills: ' + low.join(', '));
-      for (const x of g.skills) for (const d of x.details) if (!d.ok) problems.push(`   ✕ [${x.skill}] ${d.text}${d.sub ? ' — ' + d.sub : ''}`);
-    }
-  } catch (e) { problems.push('grade() threw on perfect run: ' + (e as Error).message + '\n' + (e as Error).stack); }
-
-  // empty run should not pass
-  try {
-    const emptyTicket = initialTicket(s);
-    const g0 = grade(s, cloneWorld(world), [], emptyTicket, 999999);
-    if (g0.passed) problems.push(`EMPTY RUN PASSES (overall ${g0.overall}) — scenario is too easy / mis-wired`);
-  } catch { /* ignore */ }
+  // perfect-run grade — for tokenized scenarios, across several random seeds so
+  // randomization can't silently break completability/grading.
+  const seeds = s.tokens?.length ? [1, 7, 42, 123, 999] : [undefined];
+  for (const seed of seeds) {
+    let inst;
+    try { inst = instantiate(s, seed); } catch (e) { problems.push(`instantiate threw (seed ${seed}): ${(e as Error).message}`); continue; }
+    const label = seed === undefined ? '' : ` (seed ${seed})`;
+    try {
+      const { actions, ticket } = perfectRun(inst.scenario);
+      const g = grade(inst.scenario, inst.world, actions, ticket, Math.max(1, s.estMinutes * 30));
+      if (!g.passed) problems.push(`PERFECT RUN FAILS${label} (overall ${g.overall})`);
+      else if (g.overall < 85) problems.push(`perfect run low score ${g.overall}${label}`);
+      if (g.overall < 85) {
+        for (const x of g.skills) for (const d of x.details) if (!d.ok) problems.push(`   ✕${label} [${x.skill}] ${d.text}${d.sub ? ' — ' + d.sub : ''}`);
+      }
+    } catch (e) { problems.push(`grade() threw on perfect run${label}: ${(e as Error).message}`); }
+    try {
+      const g0 = grade(inst.scenario, inst.world, [], initialTicket(inst.scenario), 999999);
+      if (g0.passed) problems.push(`EMPTY RUN PASSES${label} (overall ${g0.overall}) — too easy / mis-wired`);
+    } catch { /* ignore */ }
+  }
 
   if (problems.length) {
     failures++;

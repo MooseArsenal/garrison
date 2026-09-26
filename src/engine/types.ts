@@ -559,6 +559,11 @@ export interface Scenario {
   tools?: string[];
   /** Optional: things that happen on a timer during the scenario. */
   timeline?: { atSec: number; event: (w: World) => void; notice?: string }[];
+  /** Opt-in per-attempt randomization: each token's `from` literal is replaced
+   *  everywhere (world, intake, matchers, replies, hints) by `gen(rand)`, so
+   *  memorizable indicators (IPs, domains, hashes) change each attempt while the
+   *  correct decision stays the same. */
+  tokens?: { from: string; gen: (rand: () => number) => string }[];
 }
 
 // ----------------------------- Session --------------------------------

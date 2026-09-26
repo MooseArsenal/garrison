@@ -1,6 +1,7 @@
 import type { Scenario } from '../engine/types';
 import { ago, daysAgo, findUser } from '../engine/world';
 import { host, addEvent, addProc, addLog, addAlert, addMail, setConn } from './helpers';
+import { randIp, randHash, randDomain } from '../engine/instantiate';
 
 // ---------------------------------------------------------------------------
 // SOC1-01  EDR alert that is an authorized vuln scan (benign true positive)
@@ -73,6 +74,7 @@ const soc1_01: Scenario = {
 // ---------------------------------------------------------------------------
 const soc1_02: Scenario = {
   id: 'soc1-02',
+  tokens: [{ from: '185.220.101.47', gen: randIp }, { from: '67.160.8.51', gen: randIp }],
   tier: 'soc1',
   title: 'Impossible travel sign-in alert',
   category: 'Identity',
@@ -158,6 +160,7 @@ const soc1_02: Scenario = {
 // ---------------------------------------------------------------------------
 const soc1_03: Scenario = {
   id: 'soc1-03',
+  tokens: [{ from: 'docu-sign-verify.app', gen: randDomain }, { from: '193.42.33.14', gen: randIp }],
   tier: 'soc1',
   title: 'Reported phish — how many got it?',
   category: 'Email',
@@ -234,6 +237,7 @@ const soc1_03: Scenario = {
 // ---------------------------------------------------------------------------
 const soc1_04: Scenario = {
   id: 'soc1-04',
+  tokens: [{ from: '45.146.164.90', gen: randIp }, { from: 'cdn-updates.xyz', gen: randDomain }, { from: 'c1d2...ab', gen: randHash }],
   tier: 'soc1',
   title: 'EDR alert: malicious document spawned PowerShell',
   category: 'Endpoint',

@@ -47,6 +47,7 @@ Breaking into cybersecurity has a chicken-and-egg problem: every job wants exper
 - **Practice like a shift** — an endless mode deals case after case with a running score and streak, then an end-of-shift summary, so you can drill without clearing tiers.
 - **Guided learning paths** — ordered curricula that pair each SOP (with a knowledge check) with the cases that apply it, so you learn the concept before you're tested on it.
 - **Assign & grade** — a teacher console builds an assignment into a shareable link and decodes returned receipts in a gradebook, all with no backend or accounts.
+- **No two runs alike** — many scenarios randomize their indicators (malicious IPs, domains, hashes) every attempt, so you have to actually look them up instead of memorizing the answer.
 
 ---
 

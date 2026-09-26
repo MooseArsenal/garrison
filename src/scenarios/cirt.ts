@@ -1,12 +1,14 @@
 import type { Scenario } from '../engine/types';
 import { ago, daysAgo, findUser } from '../engine/world';
 import { host, addEvent, addProc, addLog, addAlert, setConn } from './helpers';
+import { randIp, randHash, randDomain } from '../engine/instantiate';
 
 // ---------------------------------------------------------------------------
 // CIRT-01  Ransomware in progress (full lifecycle, notifications, no wiping)
 // ---------------------------------------------------------------------------
 const cirt_01: Scenario = {
   id: 'cirt-01',
+  tokens: [{ from: '185.220.101.47', gen: randIp }, { from: 'ee55...9f', gen: randHash }],
   tier: 'cirt',
   title: 'Ransomware detonating on the file server',
   category: 'Ransomware',

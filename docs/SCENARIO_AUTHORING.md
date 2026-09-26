@@ -106,3 +106,25 @@ SOC: classification + severity · CIRT: notifications (checkboxes) + incident re
 - Escalation is a valid *correct* answer. Roughly one in four scenarios should not be resolvable at the trainee's tier.
 - Order matters where it matters: use `after`/`before` on required actions (e.g. `collect_triage` before `reimage`).
 - Keep `estMinutes` honest: 6–10 for SD1, 10–15 for SD2/SOC1, 15–20 for SOC2, 20–30 for CIRT.
+
+## Randomization (optional)
+
+Add `tokens` to a scenario to rotate memorizable indicators each attempt. Each
+token's `from` literal is replaced everywhere it appears (world data, intake,
+matchers, replies, hints, rubric) by `gen(rand)`:
+
+```ts
+import { randIp, randDomain, randHash } from '../engine/instantiate';
+// on the Scenario:
+tokens: [
+  { from: '45.146.164.90', gen: randIp },      // C2 IP
+  { from: 'cdn-updates.xyz', gen: randDomain }, // callback domain
+  { from: 'c1d2...ab', gen: randHash },         // dropped-file hash
+],
+```
+
+Rules of thumb: only tokenize *indicators* (IPs, domains, hashes) — not the cast
+(users/hosts) or internal asset IPs — and make each `from` a unique, exact string.
+The correct decision must stay the same regardless of the value. `npm run validate`
+runs tokenized scenarios across several seeds and fails if any variant becomes
+uncompletable or grades wrong, so add tokens and re-run the validator.

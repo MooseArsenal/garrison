@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
-import { TIER_LABELS, type Action, type GradeResult, type TicketState, type World } from '../engine/types';
+import { TIER_LABELS, type Action, type GradeResult, type Scenario, type TicketState, type World } from '../engine/types';
 import { getScenario } from '../scenarios';
-import { buildWorld, cloneWorld } from '../engine/world';
+import { instantiate } from '../engine/instantiate';
 import { grade } from '../engine/grading';
 import { SessionContext, initialTicket, TIER_TOOLS, TOOL_META, type Session } from '../engine/session';
 import { recordResult } from '../engine/progress';
@@ -10,8 +10,6 @@ import { Briefing } from './Briefing';
 import { Debrief } from './Debrief';
 import { WorkPanel } from './WorkPanel';
 import { TOOL_COMPONENTS } from './tools';
-
-const BASE = buildWorld();
 
 export interface ShiftView { caseNum: number; avg: number | null; streak: number; label: string; }
 
@@ -23,14 +21,13 @@ export function Play({ scenarioId, onExit, shift, onNext, onEndShift }: {
   onNext?: (r: GradeResult) => void;
   onEndShift?: (r: GradeResult) => void;
 }) {
-  const scenario = getScenario(scenarioId)!;
+  const baseScenario = getScenario(scenarioId)!;
   const toast = useToast();
+  const instRef = useRef<{ scenario: Scenario; world: World } | null>(null);
+  if (!instRef.current) instRef.current = instantiate(baseScenario);
+  const scenario = instRef.current.scenario;
   const worldRef = useRef<World | null>(null);
-  if (!worldRef.current) {
-    const w = cloneWorld(BASE);
-    scenario.setup(w);
-    worldRef.current = w;
-  }
+  if (!worldRef.current) worldRef.current = instRef.current.world;
   const actionsRef = useRef<Action[]>([]);
   const uiRef = useRef<Record<string, unknown>>({});
   const startRef = useRef<number>(Date.now());
@@ -44,10 +41,10 @@ export function Play({ scenarioId, onExit, shift, onNext, onEndShift }: {
   const firedTimers = useRef<Set<number>>(new Set());
 
   function retry() {
-    const w = cloneWorld(BASE); scenario.setup(w); worldRef.current = w;
+    const inst = instantiate(baseScenario); instRef.current = inst; worldRef.current = inst.world;
     actionsRef.current = []; uiRef.current = {}; firedTimers.current = new Set();
     startRef.current = Date.now();
-    setTicketState(initialTicket(scenario));
+    setTicketState(initialTicket(inst.scenario));
     setNotices([]); setResult(null); setActiveTool('queue'); setElapsed(0);
     setPhase('brief'); setVersion((v) => v + 1);
   }

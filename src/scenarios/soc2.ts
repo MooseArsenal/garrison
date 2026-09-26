@@ -1,6 +1,7 @@
 import type { Scenario } from '../engine/types';
 import { ago, daysAgo, findUser } from '../engine/world';
 import { host, addEvent, addProc, addLog, addAlert, addMail, setConn } from './helpers';
+import { randIp, randHash, randDomain } from '../engine/instantiate';
 
 // ---------------------------------------------------------------------------
 // SOC2-01  Business email compromise / payment-fraud attempt
@@ -86,6 +87,7 @@ const soc2_01: Scenario = {
 // ---------------------------------------------------------------------------
 const soc2_02: Scenario = {
   id: 'soc2-02',
+  tokens: [{ from: '45.146.164.90', gen: randIp }],
   tier: 'soc2',
   title: 'Hunt: did the beacon touch anyone else?',
   category: 'Threat Hunting',
